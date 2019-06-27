@@ -32,8 +32,15 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 		
 		http.csrf().disable();
 		http.authorizeRequests().antMatchers("/**").hasIpAddress(environment.getProperty("gateway.ip"))
-		.and().addFilter(new AuthenticationFilter());
+		.and().addFilter(getAuthenticationFilter());
 		http.headers().frameOptions().disable();
+	}
+	
+	private AuthenticationFilter getAuthenticationFilter() throws Exception {
+		
+		AuthenticationFilter authenticationFilter = new AuthenticationFilter(userService, environment, authenticationManager());
+		//authenticationFilter.setAuthenticationManager(authenticationManager());
+		return authenticationFilter;
 	}
 	
 	@Override
