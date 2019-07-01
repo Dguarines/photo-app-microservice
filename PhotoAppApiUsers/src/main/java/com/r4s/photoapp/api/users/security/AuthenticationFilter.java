@@ -2,6 +2,7 @@ package com.r4s.photoapp.api.users.security;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -23,6 +24,7 @@ import com.r4s.photoapp.api.users.ui.model.LoginRequestModel;
 import com.r4s.photoapp.api.users.ui.services.UsersService;
 
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	
@@ -57,6 +59,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		String userName = ((User) authResult.getPrincipal()).getUsername();
 		UserDto userDetails = usersService.getUserDetailsByUser(userName);
 		
-		//String token = Jwts.builder()
+		String token = Jwts.builder()
+				.setSubject(userDetails.getUserId())
+				.setExpiration(new Date(System.currentTimeMillis() + Long.parseLong(environment.getProperty("token.expiration_time"))))
+				.signWith(SignatureAlgorithm.HS512, environment.getProperty("token.secret"))
+				.compact();
+		
+		response.addHeader("token", token);
+		response.addHeader("userId", userDetails.getUserId());
 	}
 }
